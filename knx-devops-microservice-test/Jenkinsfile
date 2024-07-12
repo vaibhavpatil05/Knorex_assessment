@@ -11,6 +11,10 @@ pipeline {
             }
 
             // Jenkins Stage to Build the Docker Image
+            steps{
+                  sh 'docker build . -t flask-app:latest'
+                  echo "Code Built Successfully"
+            }
 
         }
 
@@ -20,7 +24,14 @@ pipeline {
             }
             
             // Jenkins Stage to Publish the Docker Image to Dockerhub or any Docker repository of your choice.
-
+            steps{
+                withCredentials([usernamePassword(credentialsId:"DockerHubCreds",passwordVariable:"dockerPass",usernameVariable:"dockerUser")]){
+                  sh "docker login -u ${env.dockerUser} -p ${env.dockerPass}"
+                  sh "docker tag flask-app:latest ${env.dockerUser}/flask-app:latest"
+                  sh "docker push ${env.dockerUser}/flask-app:latest"
+                  echo "Docker Image pushed Successfully"  
+                }
+            }    
         }
     }
 }
